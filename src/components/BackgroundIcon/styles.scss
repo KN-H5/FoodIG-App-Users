@@ -1,0 +1,30 @@
+@import "assets/styles/mixins";
+
+.bg-icon {
+  position: absolute;
+
+  @include respond(mobile) {
+    display: none;
+  }
+
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+
+  @keyframes float {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(-15px);
+    }
+  }
+
+  @keyframes scale {
+    from {
+      transform: scale(1);
+    }
+    to {
+      transform: scale(1.2);
+    }
+  }
+}

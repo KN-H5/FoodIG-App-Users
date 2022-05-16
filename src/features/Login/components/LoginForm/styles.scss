@@ -1,0 +1,33 @@
+@import "assets/styles/colors";
+@import "assets/styles/mixins";
+
+.form-login {
+  margin-bottom: 15px;
+
+  &__commit {
+    display: inline-flex;
+    align-items: center;
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+  }
+
+  &__commit-checkbox svg {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  &__commit-msg {
+    margin-left: 3px;
+  }
+
+  &__btn {
+    display: block;
+    margin: 0 auto;
+
+    background-color: transparent;
+  }
+
+  &__btn .primary-btn {
+    min-width: 9.5rem;
+  }
+}

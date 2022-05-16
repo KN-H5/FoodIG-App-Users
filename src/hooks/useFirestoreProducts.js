@@ -1,0 +1,172 @@
+import { db } from "configs/firebaseConfig";
+
+function useFirestoreProducts() {
+  const query = db.collection("users");
+
+  const checkProductExists = (data, productInfo) => {
+    return data.some((item) => item.id === productInfo.id);
+  };
+
+  const handleAddToCart = (data, productInfo, action) => {
+    const isProductExists = checkProductExists(data, productInfo);
+
+    if (isProductExists) {
+      const index = data.findIndex((item) => item.id === productInfo.id);
+      const productQnt = data[index].qnt;
+
+      const updatedProduct = {
+        ...data[index],
+        qnt:
+          action === "increase"
+            ? productQnt + 1
+            : action === "decrease"
+            ? productQnt - 1 || 1
+            : productQnt + productInfo.qnt || 1,
+      };
+
+      data[index] = updatedProduct;
+
+      return data;
+    } else {
+      return data.concat({ ...productInfo, qnt: productInfo.qnt || 1 });
+    }
+  };
+
+  const addToFirestore = (uid, product) => {  
+    query
+      .doc(uid)
+      .get()
+      .then((doc) => {
+        if (doc.exists) {
+          const { type, productInfo, action } = product || "";
+          const cartData = doc.data().cart;
+          const wishlistData = doc.data().wishlist;
+        
+          productInfo &&
+            db
+              .collection("users")
+              .doc(uid)
+              .set({
+                cart:
+                  type === "success"
+                    ? handleAddToCart(cartData, productInfo, action)
+                    : cartData,
+                wishlist:
+                  type === "wishlist" &&
+                  !checkProductExists(wishlistData, productInfo)
+                    ? wishlistData.concat(productInfo)
+                    : wishlistData,            
+              });
+        } else {
+          query.doc(uid).set({
+            cart: [],
+            checkout: [],
+            wishlist: [],
+          });
+        }
+      })
+      .catch((error) => {
+        console.log("Fail to fetch:", error.message);
+      });
+  };
+
+
+  const getTime = () =>{
+    return new Date().toLocaleTimeString();
+  }
+  const getTimeEpoch = () => {
+    return new Date().getTime();                             
+  }
+  const getDayEpoch = () => {
+    return new Date().toJSON().slice(0,10).replace(/-/g,'/');                             
+  }
+ 
+
+
+  const queryCheckout = db.collection("checkout");
+  const addToFirestoreCheckOut = (uid, product, name,phone,address, city, district,ward,discount,totalPrice,qnt) => { 
+    let id_order =   getTimeEpoch();     
+    queryCheckout
+      .doc(uid)
+      .get()
+      .then((doc) => {
+        if (doc.exists) {          
+          const checkoutData = doc.data().checkout;
+          const checkoutInfo = doc.data().info;
+          
+          const info = {
+            name: name,phone: phone,address: address, city: city, district:
+                    district,ward: ward,day: getDayEpoch(),time: getTime(),id: id_order,statuss: 'placed',
+                    discount: discount,totalPrice: totalPrice,qnt: qnt
+           }
+           queryCheckout.doc(uid).set({
+                checkout:
+                     checkoutData.concat({ ...product,id: id_order}),
+                info: 
+                  checkoutInfo.concat({...info}) 
+                });                                                        
+                removeAllFromFirestore(uid)             
+        } else {
+          queryCheckout.doc(uid).set({
+            checkout: [{ ...product}],
+            info: {name: name,phone: phone,address: address, city: city, district:
+              district,ward: ward,day: getDayEpoch(),time: getTime(),id: id_order}
+          });
+        }
+      })
+      .catch((error) => {
+        console.log("Fail to fetch:", error.message);
+      });
+     
+  };
+
+  const removeFromFirestore = (uid, product, option) => {
+    query
+      .doc(uid)
+      .get()
+      .then((doc) => {
+        const { type, productInfo } = product;
+        const cartData = doc.data().cart;
+        const wishlistData = doc.data().wishlist;
+
+        const index = (type === "success" ? cartData : wishlistData).findIndex(
+          (item) => item.id === productInfo.id
+        );
+
+        type === "success"
+          ? cartData.splice(index, 1)
+          : wishlistData.splice(index, 1);
+
+        productInfo &&
+          query.doc(uid).set({
+            cart: cartData,
+            wishlist: wishlistData,
+          });
+      })
+      .catch((error) => {
+        console.log("Fail to remove:", error.message);
+      });
+  };
+
+  const removeAllFromFirestore = (uid) => {
+    query
+      .doc(uid)
+      .get()
+      .then((doc) => {
+        const cartData = doc.data().cart;
+        const wishlistData = doc.data().wishlist;
+
+        // remove all products from cart
+        cartData.length = 0;
+
+        query.doc(uid).set({
+          cart: cartData,
+          wishlist: wishlistData,
+        });
+      });
+  };
+
+  return { addToFirestore, removeFromFirestore, removeAllFromFirestore,addToFirestoreCheckOut };
+}
+
+export default useFirestoreProducts;

@@ -1,0 +1,84 @@
+@import "assets/styles/colors";
+@import "assets/styles/mixins";
+
+.home-delivery {
+  margin-bottom: 80px;
+
+  &__container {
+    display: flex;
+    align-items: center;
+  }
+
+  &__col {
+    width: 40%;
+    margin-right: 50px;
+
+    @include respond(mobile) {
+      text-align: center;
+      width: 100%;
+      margin-right: 0;
+    }
+  }
+
+  &__description {
+    font-size: 1.4rem;
+    margin: 10px 0 20px;
+    line-height: 1.8;
+
+    color: $primary-black-color;
+
+    @include respond(phone) {
+      margin: 15px 0 25px;
+      overflow: hidden;
+      display: block;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+    }
+  }
+
+  &__contact {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+
+    &-col {
+      margin: 0 15px;
+    }
+
+    &-img {
+      width: 8.5rem;
+      transform: rotateY(180deg);
+    }
+
+    &-img {
+      @include respond(mobile) {
+        width: 7rem;
+      }
+    }
+
+    &-title {
+      font-size: 1.4rem;
+      line-height: 1.8;
+
+      color: $primary-black-color;
+    }
+
+    &-phone {
+      font-size: 1.4rem;
+    }
+
+    @include respond(mobile) {
+      justify-content: center;
+    }
+  }
+
+  &__img {
+    min-width: 40%;
+    flex: 1;
+
+    @include respond(mobile) {
+      display: none;
+    }
+  }
+}
